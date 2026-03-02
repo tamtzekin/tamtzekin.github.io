@@ -114,6 +114,7 @@ section div.body-text {
 html {
 	min-height: 100%;
 	background: linear-gradient(hwb(170 88% 3%) 5%, rgba(188,228,229, 0) 98%);
+	overscroll-behavior: none;
 }
 
 body {
@@ -122,19 +123,56 @@ body {
 	--color-link-hover: #c55347;
 	color: var(--color-text);
 
-	font-size: 1.6rem;
+	font-size: 1.8rem;
 	
-	float: left;
 	font-family: serif;
 	
-	line-height: 1.65;
-	padding: 20px 10vw 0 5vw;
+	line-height: 1.4;
+	margin: 0;
+	padding: 40px 20px;
 	position: relative;
-	/* scrollbar-color: blue orange; */
-	/* scrollbar-width: thin; */
 	z-index: 20;
+	display: flex;
+	justify-content: center;
+	align-items: flex-start;
+	min-height: 100vh;
+	cursor: crosshair;
 
 	-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility
+}
+
+.page {
+	max-width: 160mm;
+	width: 100%;
+	background: rgba(188,228,229, 0.15);
+	padding: 40mm 25mm;
+	box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+	border-radius: 2px;
+	position: relative;
+}
+
+header {
+	position: sticky;
+	top: 0;
+	z-index: 100;
+	padding: 10px 0;
+	--scroll-progress: 0;
+	transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+header.scrolled {
+	color: var(--color-link-hover);
+}
+
+header.scrolled * {
+	color: var(--color-link-hover) !important;
+}
+
+/* Smooth transitions for dynamic blur effect */
+.page > span,
+.page > h3,
+.page > li {
+	transition: filter 0.1s ease-out;
 }
 
 
@@ -175,12 +213,12 @@ a[target="_blank"]:hover::after {
 
 h1 {
     /* float: left; */
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     /* position: fixed; */
 } 
 
 h3 {
-	font-size: 1.6rem;
+	font-size: 2.2rem;
 	font-family: serif;
 	font-weight: 400;
 	display: inline-block;
@@ -190,10 +228,6 @@ h3:hover {
 	transform: rotate(-4.6deg);
 }
 
-header {
-	position: sticky;
-	top: 0;
-}
 
 a.toplinks {
     background-size: 500% auto;
@@ -219,7 +253,7 @@ a.toplinks:hover:before {
 }
 
 sup {
-  font-size: 1.1rem;
+  font-size: 1.5rem;
   font-family: monospace;
   font-style: oblique;
 	vertical-align: middle;
@@ -228,15 +262,12 @@ sup {
 
 li {
     list-style-type: none;    
-	padding: 1.3vw 0 0.5vw 0;
-
-	/* margin-bottom: 0.1vw; */
-	/* border-style: solid; */
-	/* border-radius: 20px; */
+	padding: 8px 0 4px 0;
+	padding-left: 6px;
 }
 
 li::marker {
-	content: "· ";
+	content: "○ ";
 	font-size: 1em;
 }
 
@@ -266,34 +297,16 @@ p {
 }
 
 /** MOBILE VIEW **/
-@media only screen and (max-device-width: 375px) {
+@media only screen and (max-width: 768px) {
 	body {
-		height: 100%;
-		max-height: 100%; 
+		padding: 20px 10px;
 	}
 	
-	.body-text {
-		font-size: 1.5rem;
-		width: 90%;
-		padding: 5% 0 5% 5%;
-	}
-	
-	#links {
-		min-width: 30%;
-		width: 30%;
-		position: absolute;
-	}
-	
-	#main {
-		width: 100%;
-		height: 100%;
-		position: absolute;
-	}
-	
-	#projects {
-		min-width: 30%;
-		width: 30%;
-		position: absolute;
+	.page {
+		max-width: 100%;
+		padding: 30px 20px;
+		box-shadow: none;
+		border-radius: 0;
 	}
 	
 	img {
