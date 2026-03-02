@@ -91,8 +91,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const distanceBehindHeader = scrollY - elementTop + headerHeight;
             
             if (scrollY >= headerHeight && distanceBehindHeader > 0) {
-                // Calculate blur intensity based on how far behind header the element is
-                const blurIntensity = Math.min(distanceBehindHeader / 100, 3); // Max 3px blur
+                // Calculate blur intensity - max blur when element reaches top of viewport
+                const blurIntensity = Math.min(distanceBehindHeader / 50, 4.5); // Max 4.5px blur, faster progression
                 element.style.filter = `blur(${blurIntensity}px)`;
             } else {
                 element.style.filter = 'blur(0px)';

@@ -176,9 +176,13 @@ header.scrolled * {
 }
 
 /* Idle state - blur and darken the page more */
-body.page-idle {
+body.page-idle .page {
 	filter: blur(4.5px);
 	transition: filter 0.5s ease-in-out;
+}
+
+body.page-idle header {
+	filter: blur(0px);
 }
 
 body.page-idle::before {
