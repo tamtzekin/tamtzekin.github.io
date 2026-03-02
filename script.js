@@ -5,6 +5,73 @@
     }, 500);
 }(" -⎽__⎽-⎻⎺⎺⎻-⎽__⎽⸝⎻ᐠ⸜ˎ_ˏ⸝^⸜ˎ_ˏ⸝^⸜ˎ_ˏ⸝ᐟ "));
 
+// Idle/wake effect for timer and tab switching
+document.addEventListener('DOMContentLoaded', function() {
+    let idleTimer;
+    const idleTime = 60000; // 1 minute in milliseconds
+    let isIdle = false;
+    let isTabHidden = false;
+    
+    function setIdle() {
+        if (!isIdle) {
+            document.body.classList.add('page-idle');
+            isIdle = true;
+        }
+    }
+    
+    function wakeUp() {
+        if (isIdle) {
+            document.body.classList.remove('page-idle');
+            document.body.classList.add('page-wake');
+            isIdle = false;
+            
+            // Remove wake class after animation
+            setTimeout(() => {
+                document.body.classList.remove('page-wake');
+            }, 500);
+        }
+        resetIdleTimer();
+    }
+    
+    function resetIdleTimer() {
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(setIdle, idleTime);
+    }
+    
+    // Handle tab visibility changes
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            // Tab switched away - go to sleep
+            isTabHidden = true;
+            setIdle();
+        } else {
+            // Tab is back - but stay asleep until mouse moves
+            // Just update the flag, don't wake up yet
+            // wakeUp will be triggered by mouse movement
+        }
+    });
+    
+    // Start the timer
+    resetIdleTimer();
+    
+    // Listen for mouse activity
+    function handleActivity() {
+        // Wake up if idle (either from timer or tab switch)
+        if (isIdle) {
+            if (isTabHidden) {
+                isTabHidden = false; // Reset tab hidden flag
+            }
+            wakeUp();
+        }
+    }
+    
+    document.addEventListener('mousemove', handleActivity);
+    document.addEventListener('mousedown', handleActivity);
+    document.addEventListener('click', handleActivity);
+    document.addEventListener('scroll', handleActivity);
+    document.addEventListener('keypress', handleActivity);
+});
+
 // Sticky header scroll effect with gradient text blur
 document.addEventListener('DOMContentLoaded', function() {
     const header = document.querySelector('header');

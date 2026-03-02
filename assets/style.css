@@ -175,6 +175,43 @@ header.scrolled * {
 	transition: filter 0.1s ease-out;
 }
 
+/* Idle state - blur and darken the page more */
+body.page-idle {
+	filter: blur(4.5px);
+	transition: filter 0.5s ease-in-out;
+}
+
+body.page-idle::before {
+	content: '';
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0, 0, 0, 0.6);
+	pointer-events: none;
+	z-index: 50;
+	transition: opacity 2s ease-in-out;
+	opacity: 1;
+}
+
+body:not(.page-idle)::before {
+	opacity: 0;
+}
+
+/* Wake up animation - gentle shake effect */
+@keyframes shake {
+	0%, 100% { transform: translateX(0); }
+	10%, 30%, 50%, 70%, 90% { transform: translateX(-1px); }
+	22%, 45%, 75%, 95% { transform: translateX(1px); }
+}
+
+body.page-wake {
+	animation: shake 0.3s ease-in-out;
+	filter: blur(0px);
+	transition: filter 0.5s ease-out;
+}
+
 
 a {
     /* color: darkslategray;
