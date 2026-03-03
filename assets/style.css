@@ -160,6 +160,32 @@ header {
 	transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.weather {
+	position: fixed;
+	top: 30px;
+	right: 30px;
+	font-size: 1.2rem;
+	opacity: 0.8;
+	display: flex;
+	align-items: center;
+	gap: 15px;
+	z-index: 200;
+}
+
+.weather #temp {
+	font-weight: normal;
+}
+
+.weather #season {
+	font-size: 1rem;
+	opacity: 0.8;
+}
+
+.weather #sunset {
+	font-size: 0.9rem;
+	opacity: 0.7;
+}
+
 header.scrolled {
 	color: var(--color-link-hover);
 }

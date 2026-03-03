@@ -72,6 +72,74 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('keypress', handleActivity);
 });
 
+// Simple weather display
+document.addEventListener('DOMContentLoaded', function() {
+    const tempElement = document.getElementById('temp');
+    const seasonElement = document.getElementById('season');
+    const sunriseElement = document.getElementById('sunrise');
+    const sunsetElement = document.getElementById('sunset');
+    
+    // Get current season
+    function getSeasonalInfo() {
+        const now = new Date();
+        const month = now.getMonth();
+        const day = now.getDate();
+        
+        if ((month === 11 && day >= 21) || month === 0 || month === 1 || (month === 2 && day < 20)) {
+            if (month === 11 && day === 21) return 'winter solstice';
+            return 'winter';
+        } else if ((month === 2 && day >= 20) || month === 3 || month === 4 || (month === 5 && day < 21)) {
+            if (month === 2 && day === 20) return 'spring equinox';
+            return 'spring';
+        } else if ((month === 5 && day >= 21) || month === 6 || month === 7 || (month === 8 && day < 23)) {
+            if (month === 5 && day === 21) return 'summer solstice';
+            return 'summer';
+        } else {
+            if (month === 8 && day === 23) return 'autumn equinox';
+            return 'autumn';
+        }
+    }
+    
+    // Simple sunrise/sunset calculation based on season
+    function getSunTimes() {
+        const now = new Date();
+        const month = now.getMonth();
+        
+        // Rough sunrise/sunset times by month (for mid-latitudes)
+        const sunTimes = {
+            0: { sunrise: '07:30', sunset: '17:30' },
+            1: { sunrise: '07:15', sunset: '18:00' },
+            2: { sunrise: '06:45', sunset: '18:30' },
+            3: { sunrise: '06:00', sunset: '19:00' },
+            4: { sunrise: '05:30', sunset: '19:30' },
+            5: { sunrise: '05:15', sunset: '20:00' },
+            6: { sunrise: '05:30', sunset: '20:15' },
+            7: { sunrise: '06:00', sunset: '19:45' },
+            8: { sunrise: '06:30', sunset: '19:00' },
+            9: { sunrise: '07:00', sunset: '18:15' },
+            10: { sunrise: '07:30', sunset: '17:30' },
+            11: { sunrise: '07:45', sunset: '17:00' }
+        };
+        return sunTimes[month];
+    }
+    
+    // Generate temperature based on date (same temp all day)
+    function getDailyTemp() {
+        const today = new Date();
+        const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+        const seed = dayOfYear * 9301 + 49297; // Simple pseudo-random based on day
+        const random = (seed % 233280) / 233280;
+        return Math.round(12 + random * 16); // 12-28°C
+    }
+    
+    // Show season, temperature, sunrise and sunset
+    const sunTimes = getSunTimes();
+    seasonElement.textContent = getSeasonalInfo();
+    tempElement.textContent = getDailyTemp() + '°';
+    sunriseElement.textContent = `sunrise: ${sunTimes.sunrise}`;
+    sunsetElement.textContent = `sunset: ${sunTimes.sunset}`;
+});
+
 // Sticky header scroll effect with gradient text blur
 document.addEventListener('DOMContentLoaded', function() {
     const header = document.querySelector('header');
