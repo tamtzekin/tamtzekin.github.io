@@ -146,13 +146,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const headerHeight = header.offsetHeight;
     const transitionZone = 20; // pixels for smooth transition
     
+    // Create morphed header element
+    const morphedHeader = document.createElement('div');
+    morphedHeader.className = 'header-morphed';
+    morphedHeader.innerHTML = header.innerHTML;
+    document.body.appendChild(morphedHeader);
+    
     window.addEventListener('scroll', function() {
         const scrollY = window.scrollY;
         const startPoint = headerHeight - transitionZone;
         const endPoint = headerHeight;
         
         // Update all text elements with gradient blur based on scroll position
-        const textElements = document.querySelectorAll('.page > span, .page > h3, .page > li');
+        const textElements = document.querySelectorAll('.page > span, .page > h3, .page > li, .page > p');
         
         textElements.forEach((element, index) => {
             const elementTop = element.offsetTop;
@@ -167,21 +173,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // Handle header color change
-        if (scrollY <= startPoint) {
-            header.classList.remove('scrolled');
-        } else if (scrollY >= endPoint) {
-            header.classList.add('scrolled');
-        } else {
-            const progress = (scrollY - startPoint) / transitionZone;
-            const easedProgress = 1 - Math.pow(1 - progress, 3);
-            
-            if (easedProgress > 0.5) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
-            }
-        }
+        // Handle header dissolve effect with smooth scroll-aligned transitions
+        const progress = Math.max(0, Math.min(1, (scrollY - startPoint) / transitionZone));
+        
+        // Original header fades out as you scroll
+        header.style.opacity = Math.max(0, 1 - (scrollY / headerHeight));
+        
+        // Morphed header fades in as you scroll (delayed start)
+        const morphedProgress = Math.max(0, Math.min(1, (scrollY - headerHeight * 0.5) / (headerHeight * 0.8)));
+        morphedHeader.style.opacity = morphedProgress * 0.8;
     });
 });
 
