@@ -72,13 +72,40 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('keypress', handleActivity);
 });
 
-// Simple weather display
+// Weather, horoscope and tide display
 document.addEventListener('DOMContentLoaded', function() {
     const tempElement = document.getElementById('temp');
     const seasonElement = document.getElementById('season');
     const sunriseElement = document.getElementById('sunrise');
     const sunsetElement = document.getElementById('sunset');
-    
+    const luckyNumberElement = document.getElementById('lucky-number');
+    const luckyColorElement = document.getElementById('lucky-color');
+    const tideLevelElement = document.getElementById('tide-level');
+
+    // Wrap the readings in a track and keep a duplicate alongside it, so the
+    // mobile marquee can loop without a visible seam
+    const weatherElement = document.getElementById('weather');
+    const weatherTrack = document.createElement('div');
+    weatherTrack.className = 'weather-track';
+    while (weatherElement.firstChild) {
+        weatherTrack.appendChild(weatherElement.firstChild);
+    }
+    weatherElement.appendChild(weatherTrack);
+
+    const weatherTrackClone = document.createElement('div');
+    weatherTrackClone.className = 'weather-track weather-track--clone';
+    weatherTrackClone.setAttribute('aria-hidden', 'true');
+    weatherElement.appendChild(weatherTrackClone);
+
+    function syncMarquee() {
+        weatherTrackClone.innerHTML = weatherTrack.innerHTML;
+        weatherTrackClone.querySelectorAll('[id]').forEach(function(node) {
+            node.removeAttribute('id');
+        });
+    }
+
+    syncMarquee();
+
     // Get current season
     function getSeasonalInfo() {
         const now = new Date();
@@ -132,31 +159,72 @@ document.addEventListener('DOMContentLoaded', function() {
         return Math.round(12 + random * 16); // 12-28°C
     }
     
-    // Show season, temperature, sunrise and sunset
-    const sunTimes = getSunTimes();
-    seasonElement.textContent = getSeasonalInfo();
-    tempElement.textContent = getDailyTemp() + '°';
-    sunriseElement.textContent = `sunrise: ${sunTimes.sunrise}`;
-    sunsetElement.textContent = `sunset: ${sunTimes.sunset}`;
+    // Get horoscope data from Aztro API
+    async function getHoroscope() {
+        try {
+            // Using a default sign (leo) - could be made configurable
+            const response = await fetch('https://aztro.sameerkumar.website/?sign=leo&day=today', {
+                method: 'POST'
+            });
+            const data = await response.json();
+            return {
+                luckyNumber: data.lucky_number,
+                luckyColor: data.color
+            };
+        } catch (error) {
+            console.log('Horoscope API unavailable');
+            return {
+                luckyNumber: Math.floor(Math.random() * 100) + 1,
+                luckyColor: ['blue', 'green', 'purple', 'gold', 'silver'][Math.floor(Math.random() * 5)]
+            };
+        }
+    }
+    
+    // Get tide data (simplified - using London coordinates)
+    async function getTideLevel() {
+        try {
+            // Note: This is a placeholder - WorldTides API requires a key
+            // For now, generate a simulated tide level
+            const now = new Date();
+            const hours = now.getHours();
+            const tideHeight = Math.sin((hours / 24) * Math.PI * 2) * 3 + 4; // Simulate 0-7m tide
+            return `${tideHeight.toFixed(1)}m`;
+        } catch (error) {
+            return '--m';
+        }
+    }
+    
+    // Initialize display
+    async function initializeDisplay() {
+        const sunTimes = getSunTimes();
+        seasonElement.textContent = getSeasonalInfo();
+        tempElement.textContent = getDailyTemp() + '°';
+        sunriseElement.textContent = `sunrise: ${sunTimes.sunrise}`;
+        sunsetElement.textContent = `sunset: ${sunTimes.sunset}`;
+        syncMarquee();
+
+        // Load horoscope data
+        const horoscope = await getHoroscope();
+        luckyNumberElement.textContent = `lucky: ${horoscope.luckyNumber}`;
+        luckyColorElement.textContent = `color: ${horoscope.luckyColor}`;
+        
+        // Load tide data
+        const tideLevel = await getTideLevel();
+        tideLevelElement.textContent = `tide: ${tideLevel}`;
+        syncMarquee();
+    }
+    
+    initializeDisplay();
 });
 
-// Sticky header scroll effect with gradient text blur
+// Gradient text blur on scroll
 document.addEventListener('DOMContentLoaded', function() {
     const header = document.querySelector('header');
     const headerHeight = header.offsetHeight;
-    const transitionZone = 20; // pixels for smooth transition
-    
-    // Create morphed header element
-    const morphedHeader = document.createElement('div');
-    morphedHeader.className = 'header-morphed';
-    morphedHeader.innerHTML = header.innerHTML;
-    document.body.appendChild(morphedHeader);
-    
+
     window.addEventListener('scroll', function() {
         const scrollY = window.scrollY;
-        const startPoint = headerHeight - transitionZone;
-        const endPoint = headerHeight;
-        
+
         // Update all text elements with gradient blur based on scroll position
         const textElements = document.querySelectorAll('.page > span, .page > h3, .page > li, .page > p');
         
@@ -172,16 +240,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 element.style.filter = 'blur(0px)';
             }
         });
-        
-        // Handle header dissolve effect with smooth scroll-aligned transitions
-        const progress = Math.max(0, Math.min(1, (scrollY - startPoint) / transitionZone));
-        
-        // Original header fades out as you scroll
-        header.style.opacity = Math.max(0, 1 - (scrollY / headerHeight));
-        
-        // Morphed header fades in as you scroll (delayed start)
-        const morphedProgress = Math.max(0, Math.min(1, (scrollY - headerHeight * 0.5) / (headerHeight * 0.8)));
-        morphedHeader.style.opacity = morphedProgress * 0.8;
     });
 });
 
