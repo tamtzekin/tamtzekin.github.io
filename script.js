@@ -217,6 +217,19 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeDisplay();
 });
 
+// Right-edge blur hint: on only while the columns can still scroll right
+document.addEventListener('DOMContentLoaded', function() {
+    const page = document.querySelector('.page');
+    if (!page) return;
+    const updateMore = function() {
+        document.body.classList.toggle('has-more', page.scrollLeft + page.clientWidth < page.scrollWidth - 1);
+    };
+    page.addEventListener('scroll', updateMore, { passive: true });
+    window.addEventListener('resize', updateMore);
+    window.addEventListener('load', updateMore); // widths settle once fonts are in
+    updateMore();
+});
+
 // Gradient text blur on scroll
 document.addEventListener('DOMContentLoaded', function() {
     const header = document.querySelector('header');
@@ -226,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const scrollY = window.scrollY;
 
         // Update all text elements with gradient blur based on scroll position
-        const textElements = document.querySelectorAll('.page > span, .page > h3, .page > li, .page > p');
+        const textElements = document.querySelectorAll('.col > h3, .col > p, .col > .sub');
         
         textElements.forEach((element, index) => {
             const elementTop = element.offsetTop;

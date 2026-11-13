@@ -9,6 +9,19 @@
     src: url("fonts/BMSPA___.TTF") format("truetype");
 }
 
+/* one family name for both styles, so <em> picks up the real italic */
+@font-face {
+    font-family: 'Martina Plantijn';
+    src: url("../static/fonts/martina-plantijn/test-martina-plantijn-regular.woff2") format("woff2");
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Martina Plantijn';
+    src: url("../static/fonts/martina-plantijn/test-martina-plantijn-italic.woff2") format("woff2");
+    font-style: italic;
+}
+
 @font-face {
     font-family: 'FOT-Rodin Pro';
     src: url("fonts/FOT-Rodin Pro DB.otf") format("opentype");
@@ -122,8 +135,9 @@ section div.body-text {
   }
 
 html {
+	font-size: 60%; /* global text scale: everything is rem-based */
 	min-height: 100%;
-	background: linear-gradient(rgba(188,228,229, 0) 5%, hwb(170 88% 3%) 98%);
+	background: linear-gradient(to top, rgba(188,228,229, 0) 5%, hwb(170 88% 3%) 98%);
 	overscroll-behavior: none;
 }
 
@@ -135,7 +149,7 @@ body {
 
 	font-size: 1.8rem;
 	
-	font-family: 'FOT-Rodin Pro', 'DM Sans', 'Segoe UI', sans-serif;
+	font-family: 'Martina Plantijn', Georgia, serif;
 	
 	line-height: 1.4;
 	margin: 0;
@@ -143,7 +157,7 @@ body {
 	position: relative;
 	z-index: 20;
 	display: flex;
-	justify-content: center;
+	justify-content: flex-end;
 	align-items: flex-start;
 	min-height: 100vh;
 	cursor: crosshair;
@@ -151,20 +165,64 @@ body {
 	-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility
 }
 
+/* Each section (namecard, then one per heading) is a column across the page */
 .page {
-	max-width: 160mm;
 	width: 100%;
-	background: rgba(188,228,229, 0.15);
-	padding: 40mm 25mm;
-	box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-	border-radius: 2px;
+	box-sizing: border-box;
+	/* side padding + body's 20px = 30px, the same edges as the weather row */
+	padding: 20mm 10px 40mm;
 	position: relative;
+	text-align: right;
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 3rem;
+	/* columns never wrap or stack: when they don't fit, swipe sideways */
+	overflow-x: auto;
+	scrollbar-width: none; /* still scrolls, just no visible bar */
+	overscroll-behavior-x: none; /* no sideways rubber-band bounce; vertical scroll still passes through to the page */
+}
+
+.page::-webkit-scrollbar {
+	display: none; /* older Safari / Chrome */
+}
+
+.page > * {
+	flex: none;
+}
+
+/* Hint that the columns carry on to the right: a blur that deepens towards the
+   edge. script.js sets .has-more only while there is more to scroll to. */
+body::after {
+	content: '';
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	width: 48px; /* about half a word */
+	z-index: 150; /* over the page text, under the weather bar (200) */
+	pointer-events: none;
+	-webkit-backdrop-filter: blur(5px);
+	backdrop-filter: blur(5px);
+	-webkit-mask-image: linear-gradient(to right, transparent, #000 60%);
+	mask-image: linear-gradient(to right, transparent, #000 60%);
+	opacity: 0;
+	transition: opacity 0.3s ease-out;
+}
+
+body.has-more::after {
+	opacity: 1;
+}
+
+/* so every column's first line sits on the same baseline as the namecard */
+.col > h3 {
+	margin-top: 0;
 }
 
 header {
 	position: relative;
 	z-index: 100;
-	padding: 10px 0;
+	padding: 0;
 	--scroll-progress: 0;
 	/* same type as the body copy, just dark purple */
 	font-family: inherit;
@@ -183,14 +241,11 @@ header sup {
 	vertical-align: baseline;
 }
 
-/* Services text uses Segoe UI */
-.page > .lang-swap {
-	font-family: 'Segoe UI', sans-serif;
-}
-
 .weather {
-	position: fixed;
+	/* scrolls with the page, so the right-hand column never runs under it */
+	position: absolute;
 	top: 30px;
+	left: 30px;
 	right: 30px;
 	font-size: 1.2rem;
 	opacity: 0.8;
@@ -201,11 +256,14 @@ header sup {
 	font-family: 'BM Spa', monospace;
 }
 
+/* one row across the top, first item at the left edge, last at the right */
 .weather-track {
 	display: flex;
-	flex-direction: column;
-	align-items: flex-end;
-	gap: 5px;
+	width: 100%;
+	justify-content: space-between;
+	gap: 20px;
+	line-height: 1.4;
+	white-space: nowrap;
 }
 
 /* Second copy exists only to make the mobile marquee loop seamlessly */
@@ -215,16 +273,6 @@ header sup {
 
 .weather #temp {
 	font-weight: normal;
-}
-
-.weather #season {
-	font-size: 1rem;
-	opacity: 0.8;
-}
-
-.weather #sunset {
-	font-size: 0.9rem;
-	opacity: 0.7;
 }
 
 
@@ -308,10 +356,21 @@ a::selection {
     color: #fff;
 }
 
-a[target="_blank"]:hover::after {
+a[target="_blank"]:hover::before {
   content: "彡";
-  margin: 0 3px 0 5px;
+  margin: 0 5px 0 3px;
   font-size: 0.8em;
+}
+
+/* In the columns the icon hangs outside the link, so hovering never changes
+   the link's width (which used to resize the column and nudge its neighbours) */
+.col a[target="_blank"] {
+  position: relative;
+}
+
+.col a[target="_blank"]:hover::before {
+  position: absolute;
+  right: 100%;
 }
 
 h1 {
@@ -321,14 +380,31 @@ h1 {
 } 
 
 h3 {
-	font-size: 2.2rem;
-	font-family: 'FOT-Rodin Pro', 'Exo', sans-serif;
+	/* same size as the body copy; the gap above does the separating */
+	font-size: inherit;
+	font-family: inherit;
 	font-weight: 400;
 	display: inline-block;
 }
 
+/* Sub areas of Music (Performances, Mixes): same column, a blank line above each */
+.sub {
+	margin-top: 1.4em;
+}
+
+.sub h4 {
+	font-size: inherit;
+	font-weight: 400;
+	margin: 0;
+	opacity: 0.55;
+}
+
+.sub p {
+	display: block;
+}
+
 h2 {
-	font-family: 'FOT-Rodin Pro', 'Exo', sans-serif;
+	font-family: inherit;
 }
 
 h3:hover {
@@ -403,6 +479,22 @@ p {
 	/* padding-top: 10rem; */
 }
 
+/* Sideways-only page: when the viewport is tall enough to show the longest
+   column whole, lock vertical scrolling. Shorter viewports (a phone on its
+   side) keep it so nothing is cut off. */
+@media (min-height: 900px) {
+	html {
+		overflow: hidden;
+	}
+
+	body {
+		height: 100dvh;
+		min-height: 0;
+		box-sizing: border-box;
+		overflow: hidden;
+	}
+}
+
 /** NARROW VIEW - weather becomes a marquee header bar **/
 @media only screen and (max-width: 1284px) {
 	body {
@@ -412,6 +504,7 @@ p {
 
 	/* Weather runs horizontally across the top, pinned to the viewport */
 	.weather {
+		position: fixed;
 		top: 0;
 		left: 0;
 		right: 0;
@@ -422,7 +515,6 @@ p {
 		flex-wrap: nowrap;
 		font-size: 0.85rem;
 		opacity: 1;
-		background: rgba(188,228,229, 0.9);
 		backdrop-filter: blur(8px);
 		-webkit-backdrop-filter: blur(8px);
 		overflow: hidden;
@@ -430,9 +522,8 @@ p {
 
 	.weather-track {
 		flex: 0 0 auto;
-		flex-direction: row;
+		width: auto;
 		align-items: center;
-		gap: 20px;
 		padding-right: 20px;
 		animation: weather-marquee 60s linear infinite;
 	}
@@ -444,11 +535,6 @@ p {
 	.weather span {
 		flex: 0 0 auto;
 		white-space: nowrap;
-	}
-
-	.weather #season,
-	.weather #sunset {
-		font-size: 0.85rem;
 	}
 }
 
@@ -463,8 +549,6 @@ p {
 		padding: 30px 20px;
 		/* without this the padding is added to width:100% and text runs off-screen */
 		box-sizing: border-box;
-		box-shadow: none;
-		border-radius: 0;
 	}
 
 	img {
@@ -568,7 +652,8 @@ p {
   .lang-swap:hover::after {
 	content: attr(data-language);
 	position: absolute;
-	left: 0;
+	right: 0; /* swap text grows leftwards, keeping the right edge flush */
+	white-space: nowrap;
 	top: 0;
 	color: initial;
   }
